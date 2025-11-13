@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pinta mi lienzo 🎨</title>
+  <style>
+    body {
+      background: #f2f2f2;
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 2px solid #000;
+      background: #fff;
+      touch-action: none;
+      margin-top: 10px;
+    }
+    .controles {
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🎨 ¡Pinta el lienzo!</h2>
+  <div class="controles">
+    <label>🎨 Color: <input type="color" id="color" value="#000000"></label>
+    <label>✏️ Tamaño: <input type="range" id="grosor" min="1" max="20" value="5"></label>
+    <button onclick="borrar()">🧽 Borrar todo</button>
+  </div>
+  
+  <canvas id="lienzo" width="400" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById("lienzo");
+    const ctx = canvas.getContext("2d");
+    const colorPicker = document.getElementById("color");
+    const grosor = document.getElementById("grosor");
+    let pintando = false;
+
+    // 🎨 Imagen de fondo personalizada
+    const fondo = new Image();
+    fondo.src = "https://i.imgur.com/XZwh9vh.jpeg"; // 👈 tu imagen de fondo
+    fondo.onload = () => ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+
+    function posicion(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (e.touches ? e.touches[0].clientX : e.clientX) - rect.left,
+        y: (e.touches ? e.touches[0].clientY : e.clientY) - rect.top
+      };
+    }
+
+    function dibujar(e) {
+      if (!pintando) return;
+      const pos = posicion(e);
+      ctx.lineWidth = grosor.value;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = colorPicker.value;
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+    }
+
+    function borrar() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+    }
+
+    canvas.addEventListener("mousedown", e => { pintando = true; dibujar(e); });
+    canvas.addEventListener("mouseup", () => { pintando = false; ctx.beginPath(); });
+    canvas.addEventListener("mousemove", dibujar);
+
+    canvas.addEventListener("touchstart", e => { pintando = true; dibujar(e); });
+    canvas.addEventListener("touchend", () => { pintando = false; ctx.beginPath(); });
+    canvas.addEventListener("touchmove", e => { dibujar(e); e.preventDefault(); });
+  </script>
+</body>
+</html> 
